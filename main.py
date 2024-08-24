@@ -2,12 +2,12 @@ import os
 import sys
 import glob
 import shutil
-
+import winreg
 
 folderpath = "E:\\theob\\Documents\\Python Projects\\FileCollapser\\testpath\\buh"
 
 def help():
-    print("Usage: main.py path/to/folder")
+    print("Usage: main path/to/folder")
     print("-install: Install into context menu")
     print("-move: Moves files to parent directory")
     print("-copy: Copies files to parent directory")
@@ -15,10 +15,43 @@ def help():
     print("-recurse x: search subdirectories x levels deep and move/copy files")
     sys.exit(1)
 
-def install():
+def install() -> bool:
     #TODO: Implement install function
     #Add registry key to context menu
     #set default args to -move -recurse *
+
+    # Define the registry key paths
+
+
+    #Computer\HKEY_CLASSES_ROOT\Directory\Background\shell
+    app_name = "Collapse Folder"
+    app_path = os.path.abspath(__file__)
+    icon_path = os.path.abspath(__file__) + "/icon.ico"
+
+    key_path = "Directory\shell\CollapseFolder"
+    command_key_path = key_path + "\command"
+
+    try:
+        # Create a new key for the application
+        winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, key_path)
+
+        registry_key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, key_path, 0, winreg.KEY_WRITE)
+        winreg.SetValue(registry_key, '', winreg.REG_SZ, app_name)
+        
+
+        winreg.SetValueEx(registry_key, 'Icon', 0, winreg.REG_SZ, icon_path)
+        winreg.CloseKey(registry_key)
+
+        # Create a new command key for the application
+        winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, command_key_path)
+        registry_key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, command_key_path, 0, winreg.KEY_WRITE)
+        winreg.SetValue(registry_key, '', winreg.REG_SZ, f'"{app_path}" "%1" "-m"')
+        winreg.CloseKey(registry_key)
+
+        print(f'Successfully added {app_name} to the context menu.')
+
+    except Exception as e:
+        print(f'Failed to add to context menu: {e}')
     pass
 
 def main() -> None:
@@ -30,12 +63,14 @@ def main() -> None:
     args = sys.argv[1:]
     if len(args) < 1:
         help()
+        return
     if ("-help" or "-h") in args:
         help()
+        return
 
     if ("-install") in args:
         install()
-
+        return
 
     #set operation type
     if ("-move" or "-m") in args:
@@ -60,8 +95,9 @@ def main() -> None:
         help()
         sys.exit(1)
 
+    destination = folderpath + "\\.." #parent directory
     folderpath += "\\*"
-    destination = folderpath + "\\.."
+    
 
     if debug:
         print(f"Folderpath: {folderpath}")
@@ -83,6 +119,7 @@ def main() -> None:
     if debug:
         print(f"Files: {file_list}")
         print(f"Directories: {directory_list}")
+        input("Press Enter to continue...")
 
 
 def getFiles(directory: str,depth=1) -> tuple[list[str], list[str]]:

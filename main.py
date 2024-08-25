@@ -1,10 +1,9 @@
-import os
 import sys
-import glob
-import shutil
 import winreg
+from os import path
+from glob import glob
+from shutil import move, copy
 
-folderpath = "E:\\theob\\Documents\\Python Projects\\FileCollapser\\testpath\\buh"
 
 def help():
     print("Usage: main path/to/folder")
@@ -23,7 +22,7 @@ def get_executable_path():
         return sys.executable
     else:
         # If the application is run as a script, use the script directory.
-        return os.path.abspath(__file__)
+        return path.abspath(__file__)
 
 def install() -> bool:
     #TODO: Implement install function
@@ -100,7 +99,7 @@ def main() -> None:
         delete_directories = True
 
     folderpath = sys.argv[1].lower()
-    if not os.path.exists(folderpath):
+    if not path.exists(folderpath):
         print(f"Error: Folder {folderpath} does not exist.")
         help()
         sys.exit(1)
@@ -136,8 +135,8 @@ def getFiles(directory: str,depth=1) -> tuple[list[str], list[str]]:
     files:list[str] = []
     directories:list[str] = []
 
-    for file in glob.glob(directory):
-        if os.path.isfile(file):
+    for file in glob(directory):
+        if path.isfile(file):
             files.append(file)
         else:
             directories.append(file)
@@ -152,13 +151,14 @@ def getFiles(directory: str,depth=1) -> tuple[list[str], list[str]]:
     
 def moveFile(current_path: str,destination_path:str) -> None:
     try:
-        shutil.move(current_path,destination_path)    
+        move(current_path,destination_path)    
     except Exception as e:
         print(f"Error: {e}")
 
+
 def copyFile(current_path: str,destination_path:str) -> None:
     try:
-        shutil.copy(current_path,destination_path)    
+        copy(current_path,destination_path)    
     except Exception as e:
         print(f"Error: {e}")
 

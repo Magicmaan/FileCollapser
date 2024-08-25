@@ -1,5 +1,7 @@
 # FileCollapser
 
+![FileCollapser Icon](icon.png)
+
 FileCollapser is a Python project that allows you to collapse to quickly remove all files from a folder structure.
 
 ## Features

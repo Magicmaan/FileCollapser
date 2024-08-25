@@ -15,6 +15,16 @@ def help():
     print("-recurse x: search subdirectories x levels deep and move/copy files")
     sys.exit(1)
 
+def get_executable_path():
+    if getattr(sys, 'frozen', False):
+        # If the application is run as a bundle, the PyInstaller bootloader
+        # sets the sys.frozen attribute and stores the path to the bundle
+        # directory in sys._MEIPASS.
+        return sys.executable
+    else:
+        # If the application is run as a script, use the script directory.
+        return os.path.abspath(__file__)
+
 def install() -> bool:
     #TODO: Implement install function
     #Add registry key to context menu
@@ -22,14 +32,14 @@ def install() -> bool:
 
     # Define the registry key paths
 
-
+    print(f"Executable path: {get_executable_path()}")
     #Computer\HKEY_CLASSES_ROOT\Directory\Background\shell
     app_name = "Collapse Folder"
-    app_path = os.path.abspath(__file__)
-    icon_path = os.path.abspath(__file__) + "/icon.ico"
+    app_path = get_executable_path()
+    icon_path = app_path
 
-    key_path = "Directory\shell\CollapseFolder"
-    command_key_path = key_path + "\command"
+    key_path = r"Directory\shell\CollapseFolder"
+    command_key_path = key_path + r"\command"
 
     try:
         # Create a new key for the application
@@ -58,7 +68,7 @@ def main() -> None:
     operation = "move"
     recursion_depth = 0
     delete_directories = True
-    debug = True
+    debug = False
 
     args = sys.argv[1:]
     if len(args) < 1:
